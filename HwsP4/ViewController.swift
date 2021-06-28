@@ -16,14 +16,15 @@ class ViewController: UIViewController {
     private var webView: WKWebView!
     private var progressView: UIProgressView!
     var urlString: String?
-    
-    private let websites = ["apple.com", "hackingwithswift.com"]
+    private let ac = UIAlertController(title: "Alert!", message: "This website is unsafe", preferredStyle: .alert)
+    private let websites = ["apple.com", "hackingwithswift.com", "youtube.com", "rudrank.blog", "google.com"]
     
     lazy var openButton = UIBarButtonItem(title: "Open", style: .plain, target: self, action: #selector(openTapped))
     lazy var spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
     lazy var refresh = UIBarButtonItem(barButtonSystemItem: .refresh, target: webView, action: #selector(webView.reload))
     lazy var progressButton = UIBarButtonItem(customView: progressView)
-    
+    lazy var backwardButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backwardButtonTapped))
+    lazy var forwardButton = UIBarButtonItem(image: UIImage(systemName: "chevron.forward"), style: .plain, target: self, action: #selector(forwardButtonTapped))
     
     //MARK: - App Lifecycle
 
@@ -38,7 +39,7 @@ class ViewController: UIViewController {
         progressView = UIProgressView(progressViewStyle: .default)
         progressView.sizeToFit()
         
-        toolbarItems = [progressButton, spacer, refresh]
+        toolbarItems = [backwardButton, progressButton, forwardButton, spacer, refresh]
         navigationController?.isToolbarHidden = false
         navigationItem.rightBarButtonItem =  openButton
         
@@ -86,7 +87,17 @@ class ViewController: UIViewController {
         }
     }
     
+    private func popbackViewController(alert: UIAlertAction? = nil) {
+        navigationController?.popViewController(animated: true)
+    }
     
+    @objc private func backwardButtonTapped() {
+        webView.goBack()
+    }
+    
+    @objc private func forwardButtonTapped() {
+        webView.goForward()
+    }
 
 }
 
@@ -102,14 +113,21 @@ extension ViewController: WKNavigationDelegate {
         let urlll = navigationAction.request.url
         
         if let host = urlll?.host {
+            print(host)
             for website in websites {
                 if host.contains(website) {
+                    print("containS!")
                     decisionHandler(.allow)
                     return
+                } else {
+                    print("Not")
                 }
             }
         }
         
+        ac.addAction(UIAlertAction(title: "Ok", style: .default, handler: popbackViewController))
+        present(ac, animated: true, completion: nil)
         decisionHandler(.cancel)
+        
     }
 }
