@@ -10,9 +10,13 @@ import WebKit
 
 class ViewController: UIViewController {
     
+    
+    //MARK: - Properties
+
     private var webView: WKWebView!
     private var progressView: UIProgressView!
-    private let url = URL(string: "https://www.apple.com.tw")!
+    var urlString: String?
+    
     private let websites = ["apple.com", "hackingwithswift.com"]
     
     lazy var openButton = UIBarButtonItem(title: "Open", style: .plain, target: self, action: #selector(openTapped))
@@ -20,6 +24,9 @@ class ViewController: UIViewController {
     lazy var refresh = UIBarButtonItem(barButtonSystemItem: .refresh, target: webView, action: #selector(webView.reload))
     lazy var progressButton = UIBarButtonItem(customView: progressView)
     
+    
+    //MARK: - App Lifecycle
+
     override func loadView() { //gets called before viewDidLoad
         webView = WKWebView()
         webView.navigationDelegate = self
@@ -35,6 +42,7 @@ class ViewController: UIViewController {
         navigationController?.isToolbarHidden = false
         navigationItem.rightBarButtonItem =  openButton
         
+        let url = URL(string: "https://" + urlString!)!
         webView.load(URLRequest(url: url))
         webView.allowsBackForwardNavigationGestures = true
         webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil) //!!!
@@ -42,6 +50,15 @@ class ViewController: UIViewController {
         
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        navigationController?.navigationBar.prefersLargeTitles = false
+    }
+    
+    
+    //MARK: - Functional
+
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "estimatedProgress" {
             progressView.progress = Float(webView.estimatedProgress)
@@ -57,7 +74,7 @@ class ViewController: UIViewController {
         
         ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         
-        ac.popoverPresentationController?.barButtonItem = openButton
+        ac.popoverPresentationController?.barButtonItem = openButton //for ipad
         present(ac, animated: true, completion: nil)
     }
 
